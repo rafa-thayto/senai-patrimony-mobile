@@ -1,6 +1,8 @@
 package informatica.sp.senai.br.ianesapp.views
 
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.support.design.widget.TabLayout
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -10,23 +12,30 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import informatica.sp.senai.br.ianesapp.R
 import informatica.sp.senai.br.ianesapp.config.RetrofitConfig
 import informatica.sp.senai.br.ianesapp.model.Categoria
 import informatica.sp.senai.br.ianesapp.utils.AppUtils
+import informatica.sp.senai.br.ianesapp.views.adapter.CategoriaListAdapter
+import informatica.sp.senai.br.ianesapp.views.fragments.CategoriasFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import retrofit2.Call
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
+
+    val context: Context = this
 
     /**
      * The [android.support.v4.view.PagerAdapter] that will provide
@@ -80,6 +89,16 @@ class MainActivity : AppCompatActivity() {
         val id = item.itemId
 
         if (id == R.id.action_settings) {
+            Toast.makeText(applicationContext, "Deslogando...!", Toast.LENGTH_SHORT).show()
+            val sharedPreferences = getSharedPreferences(AppUtils.SHARED_PREFERENCES(), Context.MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = sharedPreferences.edit()
+            editor.putString("token", "")
+            editor.apply()
+
+            val intent = Intent(context, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+
             return true
         }
 
@@ -96,12 +115,26 @@ class MainActivity : AppCompatActivity() {
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1)
+
+            return when (position) {
+                0 -> CategoriasFragment()
+                1 ->  PlaceholderFragment()
+                else -> PlaceholderFragment()
+            }
+//            PlaceholderFragment.newInstance(position + 1)
         }
 
         override fun getCount(): Int {
             // Show 3 total pages.
             return 3
+        }
+
+        override fun getPageTitle(position: Int): CharSequence? {
+            return when (position) {
+                0 -> "Categorias"
+                1 -> "Tab 2"
+                else -> "Tab 3"
+            }
         }
     }
 
@@ -110,10 +143,12 @@ class MainActivity : AppCompatActivity() {
      */
     class PlaceholderFragment : Fragment() {
 
+
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                                   savedInstanceState: Bundle?): View? {
             val rootView = inflater.inflate(R.layout.fragment_main, container, false)
             rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
+
             return rootView
         }
 
@@ -138,22 +173,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun carregarCategorias() {
-
-        val chamadaCategorias = RetrofitConfig(this.token!!).categoriaService().listarCategorias()
-        chamadaCategorias.enqueue(object: retrofit2.Callback<List<Categoria>> {
-
-            override fun onResponse(call: Call<List<Categoria>>?, response: Response<List<Categoria>>?) {
-                if (response!!.isSuccessful) {
-                    val categorias = response.body()
-                    Log.d("categorias", categorias.toString())
-                }
-            }
-
-            override fun onFailure(call: Call<List<Categoria>>?, t: Throwable?) {
-                Log.d("categorias", "Erro ao carregar categorias")
-            }
-        })
-
-    }
 }

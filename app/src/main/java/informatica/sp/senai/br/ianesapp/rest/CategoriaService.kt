@@ -6,7 +6,7 @@ import retrofit2.http.GET
 
 interface CategoriaService {
 
-    @GET("/patrimonios/categorias")
+    @GET("patrimonios/categorias")
     fun listarCategorias(): Call<List<Categoria>>
 
 }

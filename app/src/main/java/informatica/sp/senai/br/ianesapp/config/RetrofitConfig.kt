@@ -17,18 +17,19 @@ class RetrofitConfig {
         this.token = token
     }
 
-    var token: String = ""
-
-    val okHttpClient = OkHttpClient.Builder().addInterceptor(Interceptor {
+    private var okHttpClient = OkHttpClient.Builder().addInterceptor(Interceptor {
         val b = it.request().newBuilder()
         b.addHeader("Accept", "application/json")
-        b.addHeader("Authorization", token)
+        b.addHeader("Authorization", "$token")
         return@Interceptor it.proceed(b.build())
     })
+
+    private var token: String = ""
 
     val retrofit = Retrofit.Builder()
             .baseUrl(AppUtils.BASE_URL())
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient?.build())
             .build()
 
     fun usuarioService(): UsuarioService {

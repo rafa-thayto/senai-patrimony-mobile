@@ -13,46 +13,58 @@ import informatica.sp.senai.br.ianesapp.R
 import informatica.sp.senai.br.ianesapp.config.RetrofitConfig
 import informatica.sp.senai.br.ianesapp.model.Usuario
 import informatica.sp.senai.br.ianesapp.utils.AppUtils
+import okhttp3.ResponseBody
 import org.json.JSONObject
+import retrofit2.Call
 import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
     val context: Context = this
-    val sharedPreferences: SharedPreferences = getSharedPreferences(AppUtils.SHARED_PREFERENCES(), 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences(AppUtils.SHARED_PREFERENCES(), Context.MODE_PRIVATE)
+
+
         val tilEmailLogin = findViewById<TextInputLayout>(R.id.tilEmail)
         val tilSenhaLogin = findViewById<TextInputLayout>(R.id.tilSenha)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
 
+        // Auto completition
+        tilEmailLogin.editText?.setText("admin@email.com")
+        tilSenhaLogin.editText?.setText("admin@132")
+
         btnLogin.setOnClickListener {
+
             val usuario = Usuario(tilEmailLogin.editText?.text.toString(), tilSenhaLogin.editText?.text.toString())
             val chamadaLogin = RetrofitConfig().usuarioService().authenticate(usuario)
-            chamadaLogin.enqueue(object: retrofit2.Callback<Usuario> {
 
-                override fun onResponse(call: retrofit2.Call<Usuario>?, response: Response<Usuario>?) {
-                    if (response!!.isSuccessful) {
-                        Log.d("token", response.body().toString())
+            chamadaLogin.enqueue(object: retrofit2.Callback<ResponseBody> {
 
-                        val obj = JSONObject(response.body().toString())
-                        val token = obj.getString("token")
-                        val editor: SharedPreferences.Editor = sharedPreferences.edit()
-                        editor.putString("token", "Bearer " + token)
-                        editor.apply()
+                override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
 
-                        val intent = Intent(context, MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    }
+                    val obj = JSONObject(response?.body()?.string())
+                    Log.d("Response object: ", obj.toString())
+                    val token = obj.getString("token")
+
+                    val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                    editor.putString("token", "Bearer $token")
+                    editor.apply()
+
+                    val intent = Intent(context, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()
+
                 }
 
-                override fun onFailure(call: retrofit2.Call<Usuario>?, t: Throwable?) {
+                override fun onFailure(call: Call<ResponseBody>?, t: Throwable?) {
+
                     Toast.makeText(applicationContext, "Erro ao fazer login", Toast.LENGTH_SHORT).show()
-                    Log.d("Login error", t?.message)
+                    Log.e("Login error", t?.message)
+
                 }
 
             })
