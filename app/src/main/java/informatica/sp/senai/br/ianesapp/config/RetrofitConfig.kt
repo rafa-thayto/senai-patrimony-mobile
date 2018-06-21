@@ -1,6 +1,8 @@
 package informatica.sp.senai.br.ianesapp.config
 
+import informatica.sp.senai.br.ianesapp.rest.AmbienteService
 import informatica.sp.senai.br.ianesapp.rest.CategoriaService
+import informatica.sp.senai.br.ianesapp.rest.ItemService
 import informatica.sp.senai.br.ianesapp.rest.UsuarioService
 import informatica.sp.senai.br.ianesapp.utils.AppUtils
 import okhttp3.Interceptor
@@ -38,6 +40,14 @@ class RetrofitConfig {
 
     fun categoriaService(): CategoriaService {
         return retrofit.create(CategoriaService::class.java)
+    }
+
+    fun ambienteService(): AmbienteService {
+        return retrofit.create(AmbienteService::class.java)
+    }
+
+    fun itemService(): ItemService {
+        return retrofit.create(ItemService::class.java)
     }
 
 }

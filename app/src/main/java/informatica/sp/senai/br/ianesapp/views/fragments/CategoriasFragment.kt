@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import informatica.sp.senai.br.ianesapp.R
 import informatica.sp.senai.br.ianesapp.config.RetrofitConfig
 import informatica.sp.senai.br.ianesapp.model.Categoria
@@ -52,7 +53,7 @@ class CategoriasFragment : Fragment() {
 
     fun carregarCategorias() {
 
-        val chamadaCategorias = RetrofitConfig(this.token!!).categoriaService().listarCategorias()
+        val chamadaCategorias = RetrofitConfig(this.token).categoriaService().listarCategorias()
         chamadaCategorias.enqueue(object: retrofit2.Callback<List<Categoria>> {
 
             override fun onResponse(call: Call<List<Categoria>>?, response: Response<List<Categoria>>?) {
@@ -60,11 +61,11 @@ class CategoriasFragment : Fragment() {
                 if (categorias != null) {
                     categoriaListAdapter.carregarLista(categorias)
                 }
-                Log.d("categorias", categorias.toString())
             }
 
             override fun onFailure(call: Call<List<Categoria>>?, t: Throwable?) {
                 Log.e("categorias", "Erro ao carregar categorias")
+                Toast.makeText(context, "Verifique sua conexão de interner", Toast.LENGTH_SHORT).show()
             }
         })
 

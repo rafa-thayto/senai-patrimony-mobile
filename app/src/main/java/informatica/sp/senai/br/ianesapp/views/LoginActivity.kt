@@ -14,9 +14,11 @@ import informatica.sp.senai.br.ianesapp.config.RetrofitConfig
 import informatica.sp.senai.br.ianesapp.model.Usuario
 import informatica.sp.senai.br.ianesapp.utils.AppUtils
 import okhttp3.ResponseBody
+import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
 
@@ -46,17 +48,33 @@ class LoginActivity : AppCompatActivity() {
 
                 override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
 
-                    val obj = JSONObject(response?.body()?.string())
-                    Log.d("Response object: ", obj.toString())
-                    val token = obj.getString("token")
+                    if (response?.isSuccessful!!) {
 
-                    val editor: SharedPreferences.Editor = sharedPreferences.edit()
-                    editor.putString("token", "Bearer $token")
-                    editor.apply()
+                        try {
 
-                    val intent = Intent(context, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                            val obj = JSONObject(response?.body()?.string())
+                            Log.d("Response object: ", obj.toString())
+                            val token = obj.getString("token")
+
+                            val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                            editor.putString("token", "Bearer $token")
+                            editor.apply()
+
+                            val intent = Intent(context, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+
+                        } catch (e: IOException) {
+
+                            e.printStackTrace()
+
+                        } catch (e: JSONException) {
+
+                            e.printStackTrace()
+
+                        }
+
+                    }
 
                 }
 
